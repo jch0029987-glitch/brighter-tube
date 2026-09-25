@@ -1,14 +1,23 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <component name="MainScene" extends="Scene">
-    <script type="text/brightscript" uri="pkg:/components/MainScene.bs" />
+    <script type="text/brightscript" uri="pkg:/components/MainScene.brs" />
     
     <children>
+        <!-- App Header Title -->
         <Label 
-            text="Welcome to BrighterTube!" 
-            width="1280" 
-            height="720" 
-            horizAlign="center" 
-            vertAlign="center" 
-            fontSize="48" />
+            text="BrighterTube - Trending" 
+            font="font:LargeBoldFont" 
+            translation="[80, 60]" 
+            color="0xFFFFFFFF" />
+        
+        <!-- Video Content RowList Grid -->
+        <RowList 
+            id="videoRowList" 
+            translation="[80, 150]" 
+            itemSize="[1280, 300]" 
+            rowHeights="[260]" 
+            rowItemSizes="[[320, 180]]" 
+            rowItemSpacings="[[20, 0]]" 
+            rowFocusAnimationStyle="floating" />
     </children>
 </component>
