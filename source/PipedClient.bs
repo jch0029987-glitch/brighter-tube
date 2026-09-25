@@ -1,9 +1,28 @@
 namespace Piped
     
-    ' Fetch data from a Piped instance while masking with browser headers to bypass bot detection
+    ' Internal helper to maintain a lightweight response cache
+    function getCache() as Object
+        if m.pipedCache = invalid
+            m.pipedCache = {}
+        end if
+        return m.pipedCache
+    end function
+
+    ' Fetch data from Piped with browser headers and local caching to prevent server overload
     function fetch(endpoint as String) as Object
-        ' You can swap this out for your own self-hosted Piped instance URL if preferred
-        url = "https://pipedapi.kavin.rocks" + endpoint
+        cache = Piped.getCache()
+        currentTime = CreateObject("roDateTime").AsSeconds()
+        
+        ' Check if we have a fresh cached response (valid for 300 seconds / 5 minutes)
+        if cache.DoesExist(endpoint)
+            cachedItem = cache[endpoint]
+            if currentTime - cachedItem.timestamp < 300
+                print "Piped API Cache Hit: " + endpoint
+                return { success: true, data: cachedItem.data }
+            end if
+        end if
+
+        url = "https://api.piped.private.coffee" + endpoint
         
         port = CreateObject("roMessagePort")
         request = CreateObject("roUrlTransfer")
@@ -23,6 +42,11 @@ namespace Piped
                 if msg.GetResponseCode() = 200
                     data = ParseJson(msg.GetString())
                     if data <> invalid
+                        ' Save response to local cache with timestamp
+                        cache[endpoint] = {
+                            timestamp: currentTime,
+                            data: data
+                        }
                         return { success: true, data: data }
                     end if
                 else
