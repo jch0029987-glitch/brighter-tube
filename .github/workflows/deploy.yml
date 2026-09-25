@@ -22,12 +22,6 @@ jobs:
         run: |
           npm install
           npm install -g ropm
-          
-          # Initialize ropm if ropm.json doesn't exist yet
-          if [ ! -f "ropm.json" ]; then
-            ropm init --yes
-          fi
-          
           ropm install
 
       - name: Commit Ropm Files Back to Repo
@@ -35,16 +29,20 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           
-          # Stage ropm configuration files
-          git add ropm.json
+          # Safely stage package.json or any modified dependency layout
+          for file in package.json package-lock.json; do
+            if [ -e "$file" ]; then
+              git add "$file"
+            fi
+          done
           
           # Check if there are any staged changes to commit
           if git diff --staged --quiet; then
-            echo "No ropm changes to commit."
+            echo "No package changes to commit."
           else
-            git commit -m "chore: auto-update ropm configuration [skip ci]"
+            git commit -m "chore: auto-update ropm dependencies [skip ci]"
             git push
-            echo "Successfully committed ropm updates back to repository."
+            echo "Successfully committed dependency updates back to repository."
           fi
 
       - name: Compile BrighterScript
