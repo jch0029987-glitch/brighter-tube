@@ -3,6 +3,9 @@ name: Build and Deploy BrighterTube
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -15,9 +18,37 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Compile BrighterScript
+      - name: Install Dependencies and Ropm
         run: |
           npm install
+          npm install -g ropm
+          
+          # Initialize ropm if ropm.json doesn't exist yet
+          if [ ! -f "ropm.json" ]; then
+            ropm init --yes
+          fi
+          
+          ropm install
+
+      - name: Commit Ropm Files Back to Repo
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          
+          # Stage ropm configuration files
+          git add ropm.json
+          
+          # Check if there are any staged changes to commit
+          if git diff --staged --quiet; then
+            echo "No ropm changes to commit."
+          else
+            git commit -m "chore: auto-update ropm configuration [skip ci]"
+            git push
+            echo "Successfully committed ropm updates back to repository."
+          fi
+
+      - name: Compile BrighterScript
+        run: |
           npm run build
 
       - name: Connect to Tailscale
