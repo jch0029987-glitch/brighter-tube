@@ -1,7 +1,9 @@
 {
   "compilerOptions": {
-    "rootDir": ".",
-    "outDir": "dist",
-    "retainStagingFolder": false
+    "rootDir": "src",
+    "outDir": "out",
+    "plugins": [
+      "ropm"
+    ]
   }
 }
