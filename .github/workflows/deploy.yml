@@ -21,9 +21,25 @@ jobs:
           npm install
           npm run build
 
+      - name: Debug Directory Contents
+        run: |
+          echo "=== Root Files ==="
+          ls -la
+          echo "=== Checking potential output dirs ==="
+          ls -la dist/ || true
+          ls -la out/ || true
+
       - name: Package App Zip
         run: |
-          cd dist && zip -r brighter-tube.zip .
+          # Fallback or dynamic packaging depending on where bsc outputs
+          if [ -d "dist" ]; then
+            cd dist && zip -r brighter-tube.zip .
+          elif [ -d "out" ]; then
+            cd out && zip -r ../brighter-tube.zip .
+          else
+            # If bsc outputs directly to root or somewhere else
+            zip -r brighter-tube.zip manifest source components
+          fi
 
       - name: Connect to Tailscale
         uses: tailscale/github-action@v4
@@ -36,7 +52,7 @@ jobs:
         run: |
           curl --digest -u "rokudev:${{ secrets.ROKU_DEV_PASSWORD }}" \
             -F "mysubmit=Install" \
-            -F "archive=@./dist/brighter-tube.zip" \
+            -F "archive=@./brighter-tube.zip" \
             http://192.168.1.231/plugin_install
 
       - name: Stream Roku Logs
