@@ -1,4 +1,56 @@
 sub init()
-    m.top.setFocus(true)
-    print "MainScene initialized successfully."
+    m.videoRowList = m.top.findNode("videoRowList")
+    m.videoRowList.setFocus(true)
+    
+    ' Fetch trending data on startup
+    loadTrendingContent()
 end sub
+
+sub loadTrendingContent()
+    ' Call the Piped client we set up earlier
+    result = Piped.getTrending()
+    
+    if result.success and result.data <> invalid
+        contentNode = CreateObject("roSGNode", "ContentNode")
+        rowNode = contentNode.createChild("ContentNode")
+        rowNode.title = "Trending"
+        
+        ' Loop through Piped video entries and bind them to Roku nodes
+        for each item in result.data
+            itemNode = rowNode.createChild("ContentNode")
+            itemNode.title = item.title
+            
+            ' Piped schema provides thumbnail URLs for posters
+            if item.thumbnail <> invalid
+                itemNode.hdPosterUrl = item.thumbnail
+                itemNode.sdPosterUrl = item.thumbnail
+            end if
+            
+            ' Store the video ID/URL for playback handling later
+            if item.url <> invalid
+                itemNode.url = item.url
+            end if
+        end for
+        
+        ' Assign content to the RowList
+        m.videoRowList.content = contentNode
+    else
+        print "MainScene: Failed to load trending content."
+    end if
+end sub
+
+function onKeyEvent(key as String, press as Boolean) as Boolean
+    handled = false
+    if press
+        if key = "OK"
+            selectedRowCol = m.videoRowList.rowItemFocused
+            selectedContent = m.videoRowList.content.getChild(selectedRowCol[0]).getChild(selectedRowCol[1])
+            if selectedContent <> invalid
+                print "Selected Video Title: " + selectedContent.title
+                ' TODO: Trigger video playback component with selectedContent.url
+                handled = true
+            end if
+        end if
+    end if
+    return handled
+end function
