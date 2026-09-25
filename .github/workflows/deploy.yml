@@ -3,7 +3,7 @@ name: Build and Deploy BrighterTube
 on:
   push:
     branches: [ "main" ]
-    
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -21,25 +21,13 @@ jobs:
           npm install
           npm run build
 
-      - name: Debug Directory Contents
+      - name: Ensure Correct Zip Structure
         run: |
-          echo "=== Root Files ==="
-          ls -la
-          echo "=== Checking potential output dirs ==="
-          ls -la dist/ || true
-          ls -la out/ || true
-
-      - name: Package App Zip
-        run: |
-          # Fallback or dynamic packaging depending on where bsc outputs
-          if [ -d "dist" ]; then
-            cd dist && zip -r brighter-tube.zip .
-          elif [ -d "out" ]; then
-            cd out && zip -r ../brighter-tube.zip .
-          else
-            # If bsc outputs directly to root or somewhere else
-            zip -r brighter-tube.zip manifest source components
-          fi
+          cd dist
+          zip -r ../brighter-tube.zip .
+          cd ..
+          echo "=== Zip Contents ==="
+          unzip -l brighter-tube.zip
 
       - name: Connect to Tailscale
         uses: tailscale/github-action@v4
