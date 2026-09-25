@@ -21,14 +21,6 @@ jobs:
           npm install
           npm run build
 
-      - name: Ensure Correct Zip Structure
-        run: |
-          cd dist
-          zip -r ../brighter-tube.zip .
-          cd ..
-          echo "=== Zip Contents ==="
-          unzip -l brighter-tube.zip
-
       - name: Connect to Tailscale
         uses: tailscale/github-action@v4
         with:
@@ -40,7 +32,7 @@ jobs:
         run: |
           curl --digest -u "rokudev:${{ secrets.ROKU_DEV_PASSWORD }}" \
             -F "mysubmit=Install" \
-            -F "archive=@./brighter-tube.zip" \
+            -F "archive=@./out/brighter-tube.zip" \
             http://192.168.1.231/plugin_install
 
       - name: Stream Roku Logs
