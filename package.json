@@ -1,0 +1,10 @@
+{
+  "name": "brighter-tube",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "bsc"
+  },
+  "devDependencies": {
+    "brighterscript": "^0.60.0"
+  }
+}
