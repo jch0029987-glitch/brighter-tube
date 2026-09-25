@@ -1,0 +1,23 @@
+name: Test Tailscale Connection
+
+on:
+  workflow_dispatch: # Allows you to manually trigger this test from the Actions tab
+
+jobs:
+  test-tailscale:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@v4
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci
+
+      - name: Test Connection to Home Network
+        run: |
+          echo "Successfully connected to Tailscale!"
+          tailscale status
